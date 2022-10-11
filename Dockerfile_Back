@@ -4,6 +4,6 @@ COPY imageBin/ /opt/touchcloud/bin
 
 COPY back-end/src/ /opt/touchcloud/src
 
-WORKDIR /opt/touchcloud/bin
+WORKDIR /opt/touchcloud/src
 
-CMD ["bash","run.sh"]
+CMD ["python3","run.py"]
