@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+    baseImage:
+        build:
+            context: .
+            dockerfile: ./Dockerfile_Base
+        image: touchcloud/gauge-api:base
+
+    gauge-api:
+        container_name: gauge-api
+        build:
+            context: .
+            dockerfile: ./Dockerfile_Back
+        image: touchcloud/gauge-api:${VERSION}
+        #network_mode: host
+        devices:
+            - /dev/dri
+        ports:
+            - "5050:5050"
+#        volumes:
+#             - /home/ubuntu/Project/ffmpeg/output:/opt/touchcloud/output
