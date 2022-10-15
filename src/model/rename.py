@@ -5,6 +5,7 @@ import uuid
 
 # Third party imports
 import psycopg2
+from psycopg2 import pool
 
 # Local application imports
 
@@ -20,29 +21,34 @@ class rename:
         self.__password = password
         self.__port     = port
         self.__dbName   = dbName
+        try:
+            self.__postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20, 
+                                                                user=self.__user,
+                                                                password=self.__password,
+                                                                host=self.__host,
+                                                                port=self.__port,
+                                                                database=self.__dbname)
+            if (self.__postgreSQL_pool):
+                print("Connection pool created successfully")
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error while connecting to PostgreSQL", error)
 
     def connect(self):
-        """Connect to a Postgres database."""
         try:
-            conn = psycopg2.connect(
-                host=self.__host,
-                user=self.__username,
-                password=self.__password,
-                port=self.__port,
-                dbname=self.__dbName
-            )
-
+            conn =self.__postgreSQL_pool.getconn()
 
         except psycopg2.DatabaseError as e:
             logger.error(e)
             raise e
 
         finally:
-            logger.info('Connection opened successfully.')
+            logger.warning('Connection opened successfully.')
             return conn
+
     
     #Read data from rename table
-    def getrename(self):
+    def get(self):
         try:
             sql = """ SELECT * FROM rename"""
             conn = self.connect()
@@ -51,24 +57,26 @@ class rename:
                 records = cur.fetchall()
 
         except psycopg2.DatabaseError as e:
+            logger.warning('get Profiles id failed. roll back')
             logger.error(e)
             raise e
-        
+
         finally:
             if conn:
-                conn.close()     
+                self.disConnect(conn)
+            logger.warning('connection close')
             return records
 
+
     #inert data into rename table
-    def insertrename(self, renameUUID, renameJsonStr):
+    def insert(self, UUID, JsonStr):
         try:
             sql = """ INSERT INTO rename (id, info) VALUES (%s, %s) """
-            insertTuple = (renameUUID, renameJsonStr)
+            insertTuple = (UUID, JsonStr)
             
             conn = self.connect()
             with conn.cursor() as cur:
                 cur.execute(sql, insertTuple)
-                conn.commit()
 
         except psycopg2.DatabaseError as e:
             logger.error(e)
@@ -80,16 +88,15 @@ class rename:
             logger.info('insert successfully.')
 
     #delete data from rename table
-    def deleterename(self, renameUUID):
+    def delete(self, UUID):
         try:
             sql = """ DELETE FROM rename WHERE id=%s """
 
             conn = self.connect()
             with conn.cursor() as cur:
-                cur.execute(sql, (renameUUID,))
-                conn.commit()
-                rows_deleted = cur.rowcount
-                print(rows_deleted)
+                cur.execute(sql, (UUID,))
+                #rows_deleted = cur.rowcount
+                #print(rows_deleted)
 
         except psycopg2.DatabaseError as e:
             logger.error(e)

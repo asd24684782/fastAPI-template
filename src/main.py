@@ -6,13 +6,14 @@ from datetime import datetime
 
 # Third party imports
 from fastapi import Depends, FastAPI, HTTPException
-
 # Local application imports
 from config.EnumApp import AppEnum
 from schema.schema import *
-
+from routers import users
 #---------------- global -------------------# 
 app = FastAPI()
+app.include_router(users.router)
+
 logger = logging.getLogger()
 logging.basicConfig(level=logging.WARNING,format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s')
 
