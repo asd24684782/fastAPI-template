@@ -32,7 +32,7 @@ fastAPI-template
 ```
 
 ### env 
-Write your packages name in requirements.txt and you can use this cmd to install all packages in requirements.txt.
+Write your packages name in requirements.txt.You can use this cmd to install all packages in requirements.txt.
 ```
 pip install -r requirements.txt
 ```
